@@ -1,6 +1,6 @@
 const Merchant = require('../models/Merchant');
 const MerchantDocument = require('../models/MerchantDocument');
-const { QRCode, Commission } = require('../models/index');
+const { QRCode, Commission, Invoice } = require('../models/index');
 const { createAuditLog } = require('../utils/auditLogger');
 const { sendNotification, NOTIFICATION_TYPES } = require('../utils/notifications');
 const { uploadMerchantDoc } = require('../config/cloudinary');
@@ -152,4 +152,33 @@ exports.updateMerchant = async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+};
+
+
+// ─── Get My Invoices ─────────────────────────────────────────────
+
+exports.getMyInvoices = async (req, res) => {
+
+  try {
+
+    const invoices = await Invoice.find({
+      agent: req.user._id
+    }).sort({
+      createdAt: -1
+    });
+
+    res.json({
+      success: true,
+      data: invoices
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+
+  }
+
 };
