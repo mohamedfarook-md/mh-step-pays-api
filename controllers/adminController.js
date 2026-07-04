@@ -360,8 +360,8 @@ console.log("Saving invoice...");
       month,
       amount: amount || 0,
 
-      filePublicId: req.file.public_id,
-      fileUrl: req.file.secure_url,
+     filePublicId: req.file.filename,
+fileUrl: req.file.path,
 
       status: "issued",
       issuedAt: new Date()
