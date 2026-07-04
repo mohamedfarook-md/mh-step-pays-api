@@ -353,7 +353,7 @@ exports.uploadInvoice = async (req, res) => {
         message: "Invoice PDF is required"
       });
     }
-
+console.log("Saving invoice...");
     const invoice = await Invoice.create({
       agent,
       type: type || "monthly",
@@ -366,7 +366,7 @@ exports.uploadInvoice = async (req, res) => {
       status: "issued",
       issuedAt: new Date()
     });
-
+console.log("Saved successfully");
     res.json({
       success: true,
       message: "Invoice uploaded successfully",
@@ -375,12 +375,20 @@ exports.uploadInvoice = async (req, res) => {
 
   } catch (err) {
 
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
+  console.log("========== INVOICE ERROR ==========");
+  console.log(err);
+  console.log("Message:", err.message);
 
+  if (err.errors) {
+    console.log("Validation Errors:", err.errors);
   }
+
+  res.status(500).json({
+    success: false,
+    message: err.message
+  });
+
+}
 };
 
 
