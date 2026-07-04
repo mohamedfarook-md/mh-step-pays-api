@@ -41,15 +41,22 @@ const uploadQR = multer({
 });
 
 // Invoice PDF storage
+// const invoiceStorage = new CloudinaryStorage({
+//   cloudinary,
+//   params: {
+//     folder: 'mh-step-pays/invoices',
+//     allowed_formats: ['pdf'],
+//     resource_type: 'raw'
+//   }
+// });
+
 const invoiceStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'mh-step-pays/invoices',
-    allowed_formats: ['pdf'],
-    resource_type: 'raw'
-  }
+  params: async (req, file) => ({
+    folder: "mh-step-pays/invoices",
+    resource_type: "auto"
+  })
 });
-
 const uploadInvoice = multer({
   storage: invoiceStorage,
   limits: {
