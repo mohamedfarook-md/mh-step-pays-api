@@ -60,16 +60,58 @@ const commissionSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // ─── Invoice ───────────────────────────────────────────────────────────────
+// const invoiceSchema = new mongoose.Schema({
+//   agent: { type: mongoose.Schema.Types.ObjectId, ref: 'FieldAgent' },
+//   type: { type: String, enum: ['monthly', 'commission', 'settlement'], required: true },
+//   month: { type: String }, // YYYY-MM
+//   amount: { type: Number },
+//   filePublicId: { type: String },
+//   fileUrl: { type: String },
+//   status: { type: String, enum: ['draft', 'issued', 'paid'], default: 'draft' },
+//   issuedAt: { type: Date },
+// }, { timestamps: true });
+
 const invoiceSchema = new mongoose.Schema({
-  agent: { type: mongoose.Schema.Types.ObjectId, ref: 'FieldAgent' },
-  type: { type: String, enum: ['monthly', 'commission', 'settlement'], required: true },
-  month: { type: String }, // YYYY-MM
-  amount: { type: Number },
-  filePublicId: { type: String },
-  fileUrl: { type: String },
-  status: { type: String, enum: ['draft', 'issued', 'paid'], default: 'draft' },
-  issuedAt: { type: Date },
-}, { timestamps: true });
+
+  agent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'FieldAgent',
+    required: true
+  },
+
+  month: {
+    type: String,
+    required: true
+  },
+
+  year: {
+    type: Number,
+    required: true
+  },
+
+  pdfPublicId: {
+    type: String,
+    required: true
+  },
+
+  pdfUrl: {
+    type: String,
+    required: true
+  },
+
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin'
+  },
+
+  uploadedAt: {
+    type: Date,
+    default: Date.now
+  }
+
+}, {
+  timestamps: true
+});
 
 module.exports = {
   QRCode: mongoose.model('QRCode', qrCodeSchema),

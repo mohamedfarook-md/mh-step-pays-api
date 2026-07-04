@@ -1,7 +1,7 @@
 const FieldAgent = require('../models/FieldAgent');
 const Merchant = require('../models/Merchant');
 const MerchantDocument = require('../models/MerchantDocument');
-const { QRCode, Commission, AuditLog, AttendanceLog } = require('../models/index');
+const { QRCode, Commission, AuditLog, AttendanceLog, Invoice } = require('../models/index');
 const { createAuditLog } = require('../utils/auditLogger');
 const { sendNotification, NOTIFICATION_TYPES } = require('../utils/notifications');
 const { getSignedUrl, uploadQR } = require('../config/cloudinary');
@@ -327,4 +327,92 @@ exports.getAuditLogs = async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+};
+
+
+// ===============================
+// Upload Invoice
+// ===============================
+// ===============================
+// Upload Invoice
+// ===============================
+
+exports.uploadInvoice = async (req, res) => {
+  try {
+
+    const {
+      agent,
+      month,
+      amount,
+      type
+    } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice PDF is required"
+      });
+    }
+
+    const invoice = await Invoice.create({
+      agent,
+      type: type || "monthly",
+      month,
+      amount: amount || 0,
+
+      filePublicId: req.file.public_id,
+      fileUrl: req.file.secure_url,
+
+      status: "issued",
+      issuedAt: new Date()
+    });
+
+    res.json({
+      success: true,
+      message: "Invoice uploaded successfully",
+      data: invoice
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+
+  }
+};
+
+
+// ===============================
+// Get All Invoices
+// ===============================
+
+exports.getInvoices = async (req, res) => {
+
+  try {
+
+    const invoices = await Invoice.find()
+      .populate(
+        "agent",
+        "fullName email mobile"
+      )
+      .sort({
+        createdAt: -1
+      });
+
+    res.json({
+      success: true,
+      data: invoices
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+
+  }
+
 };

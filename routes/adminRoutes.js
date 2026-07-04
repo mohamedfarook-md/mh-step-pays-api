@@ -3,7 +3,7 @@ const router = express.Router();
 const { protect, adminOnly } = require('../middleware/auth');
 const ac = require('../controllers/adminController');
 const dc = require('../controllers/documentController');
-const { uploadQR } = require('../config/cloudinary');
+const { uploadQR, uploadInvoice } = require('../config/cloudinary');
 
 router.use(protect, adminOnly);
 
@@ -28,6 +28,18 @@ router.put('/merchants/:merchantId/documents/verify', dc.verifyDocuments);
 // QR
 router.post('/merchants/:merchantId/qr', uploadQR.single('qrImage'), ac.uploadQRCode);
 router.put('/merchants/:merchantId/qr/deploy', ac.deployQR);
+
+// Invoice
+router.post(
+  '/invoices/upload',
+  uploadInvoice.single('invoice'),
+  ac.uploadInvoice
+);
+
+router.get(
+  '/invoices',
+  ac.getInvoices
+);
 
 // Audit Logs
 router.get('/audit-logs', ac.getAuditLogs);

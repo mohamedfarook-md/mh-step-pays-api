@@ -40,6 +40,23 @@ const uploadQR = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
+// Invoice PDF storage
+const invoiceStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'mh-step-pays/invoices',
+    allowed_formats: ['pdf'],
+    resource_type: 'raw'
+  }
+});
+
+const uploadInvoice = multer({
+  storage: invoiceStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  }
+});
+
 // Generate signed URL for secure document access (Admin only)
 const getSignedUrl = (publicId, resourceType = 'image') => {
   return cloudinary.url(publicId, {
@@ -50,4 +67,12 @@ const getSignedUrl = (publicId, resourceType = 'image') => {
   });
 };
 
-module.exports = { cloudinary, uploadMerchantDoc, uploadQR, getSignedUrl };
+// module.exports = { cloudinary, uploadMerchantDoc, uploadQR, getSignedUrl };
+
+module.exports = {
+  cloudinary,
+  uploadMerchantDoc,
+  uploadQR,
+  uploadInvoice,
+  getSignedUrl
+};
