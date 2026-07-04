@@ -70,7 +70,6 @@ const commissionSchema = new mongoose.Schema({
 //   status: { type: String, enum: ['draft', 'issued', 'paid'], default: 'draft' },
 //   issuedAt: { type: Date },
 // }, { timestamps: true });
-
 const invoiceSchema = new mongoose.Schema({
 
   agent: {
@@ -79,32 +78,39 @@ const invoiceSchema = new mongoose.Schema({
     required: true
   },
 
+  type: {
+    type: String,
+    enum: ['monthly', 'commission', 'settlement'],
+    default: 'monthly'
+  },
+
   month: {
     type: String,
     required: true
   },
 
-  year: {
+  amount: {
     type: Number,
-    required: true
+    default: 0
   },
 
-  pdfPublicId: {
+  filePublicId: {
     type: String,
     required: true
   },
 
-  pdfUrl: {
+  fileUrl: {
     type: String,
     required: true
   },
 
-  uploadedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Admin'
+  status: {
+    type: String,
+    enum: ['draft', 'issued', 'paid'],
+    default: 'issued'
   },
 
-  uploadedAt: {
+  issuedAt: {
     type: Date,
     default: Date.now
   }
@@ -112,7 +118,6 @@ const invoiceSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
 module.exports = {
   QRCode: mongoose.model('QRCode', qrCodeSchema),
   Notification: mongoose.model('Notification', notificationSchema),
