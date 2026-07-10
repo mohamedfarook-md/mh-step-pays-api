@@ -1,13 +1,50 @@
 const mongoose = require("mongoose");
 
+const transactionSchema = new mongoose.Schema(
+  {
+    txnId: String,
+    amount: Number,
+    utr: String,
+    status: String,
+    transactionTime: Date
+  },
+  { _id: false }
+);
+
 const soundboxSchema = new mongoose.Schema(
   {
-    merchant: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Merchant",
+    // Merchant Details
+    merchantName: {
+      type: String,
       required: true
     },
 
+    mobile: {
+      type: String,
+      required: true
+    },
+
+    email: {
+      type: String,
+      default: ""
+    },
+
+    shopName: {
+      type: String,
+      required: true
+    },
+
+    shopAddress: {
+      type: String,
+      required: true
+    },
+
+    upiId: {
+      type: String,
+      required: true
+    },
+
+    // Soundbox Details
     tid: {
       type: String,
       required: true,
@@ -20,37 +57,13 @@ const soundboxSchema = new mongoose.Schema(
       unique: true
     },
 
-    serialNumber: {
+    barcode: {
       type: String,
       required: true,
       unique: true
     },
 
-    bic: {
-      type: String,
-      required: true
-    },
-
-    clientId: {
-      type: String,
-      required: true
-    },
-
-    clientSecret: {
-      type: String,
-      required: true
-    },
-
-    apiKey: {
-      type: String,
-      required: true
-    },
-
-    encryptionKey: {
-      type: String,
-      required: true
-    },
-
+    // Device Status
     status: {
       type: String,
       enum: ["Pending", "Active", "Inactive"],
@@ -59,10 +72,14 @@ const soundboxSchema = new mongoose.Schema(
 
     activatedAt: Date,
 
+    // Transaction History
+    transactions: [transactionSchema],
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin"
     }
+
   },
   {
     timestamps: true

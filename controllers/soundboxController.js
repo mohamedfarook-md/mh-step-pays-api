@@ -1,8 +1,23 @@
 const { Soundbox } = require("../models");
-
+const { sendNotification } = require("../utils/tonetag");
 // Create Soundbox
 exports.createSoundbox = async (req, res) => {
   try {
+
+    const exists = await Soundbox.findOne({
+  $or: [
+    { tid: req.body.tid },
+    { imei: req.body.imei },
+    { barcode: req.body.barcode }
+  ]
+});
+
+if (exists) {
+  return res.status(400).json({
+    success: false,
+    message: "Soundbox already exists."
+  });
+}
 
     const soundbox = await Soundbox.create({
       ...req.body,
@@ -29,9 +44,8 @@ exports.createSoundbox = async (req, res) => {
 exports.getAllSoundboxes = async (req, res) => {
   try {
 
-    const soundboxes = await Soundbox.find()
-      .populate("merchant", "merchantName shopName")
-      .sort({ createdAt: -1 });
+  const soundboxes = await Soundbox.find()
+  .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -52,8 +66,7 @@ exports.getAllSoundboxes = async (req, res) => {
 exports.getSoundbox = async (req, res) => {
   try {
 
-    const soundbox = await Soundbox.findById(req.params.id)
-      .populate("merchant", "merchantName shopName");
+   const soundbox = await Soundbox.findById(req.params.id);
 
     if (!soundbox) {
       return res.status(404).json({
@@ -81,11 +94,27 @@ exports.getSoundbox = async (req, res) => {
 exports.updateSoundbox = async (req, res) => {
   try {
 
-    const soundbox = await Soundbox.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+   const exists = await Soundbox.findOne({
+  _id: { $ne: req.params.id },
+  $or: [
+    { tid: req.body.tid },
+    { imei: req.body.imei },
+    { barcode: req.body.barcode }
+  ]
+});
+
+if (exists) {
+  return res.status(400).json({
+    success: false,
+    message: "TID / IMEI / Barcode already exists."
+  });
+}
+
+const soundbox = await Soundbox.findByIdAndUpdate(
+  req.params.id,
+  req.body,
+  { new: true }
+);
 
     res.json({
       success: true,
@@ -138,7 +167,18 @@ exports.activateSoundbox = async (req, res) => {
     }
 
     soundbox.status = "Active";
-    soundbox.activatedAt = new Date();
+soundbox.activatedAt = new Date();
+
+// TODO:
+// ToneTag Token Generate
+// ToneTag Activate API Call
+    await sendNotification({
+  amount: "1.00",
+  tid: soundbox.tid,
+  status: 2,
+  txnType: 1,
+  reference: `TEST${Date.now()}`
+});
 
     await soundbox.save();
 
