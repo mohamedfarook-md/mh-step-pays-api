@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Soundbox = require("./Soundbox");
 
 // ─── QR Code ───────────────────────────────────────────────────────────────
 const qrCodeSchema = new mongoose.Schema({
@@ -125,4 +126,5 @@ module.exports = {
   AuditLog: mongoose.model('AuditLog', auditLogSchema),
   Commission: mongoose.model('Commission', commissionSchema),
   Invoice: mongoose.model('Invoice', invoiceSchema),
+  Soundbox
 };

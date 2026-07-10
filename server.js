@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
+const soundboxRoutes = require("./routes/soundboxRoutes");
 dotenv.config();
 
 const app = express();
@@ -39,6 +39,7 @@ app.use('/api/attendance', require('./routes/attendanceRoutes'));
 app.use('/api/audit', require('./routes/auditRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/commissions', require('./routes/commissionRoutes'));
+app.use('/api/soundboxes', soundboxRoutes);
 
 // DB Connection
 mongoose.connect(process.env.MONGODB_URI)
