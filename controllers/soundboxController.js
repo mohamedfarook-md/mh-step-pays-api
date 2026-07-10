@@ -3,7 +3,7 @@ const { sendNotification } = require("../utils/tonetag");
 // Create Soundbox
 exports.createSoundbox = async (req, res) => {
   try {
-
+   console.log("BODY =>", req.body);
     const exists = await Soundbox.findOne({
   $or: [
     { tid: req.body.tid },
