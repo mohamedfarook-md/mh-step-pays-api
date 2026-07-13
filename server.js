@@ -40,6 +40,7 @@ app.use('/api/audit', require('./routes/auditRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/commissions', require('./routes/commissionRoutes'));
 app.use('/api/soundboxes', soundboxRoutes);
+app.use("/api/easebuzz", require("./routes/easebuzzWebhookRoutes"));
 
 // DB Connection
 mongoose.connect(process.env.MONGODB_URI)

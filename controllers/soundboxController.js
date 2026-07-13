@@ -4,18 +4,19 @@ const { sendNotification } = require("../utils/tonetag");
 exports.createSoundbox = async (req, res) => {
   try {
    console.log("BODY =>", req.body);
-    const exists = await Soundbox.findOne({
+   const exists = await Soundbox.findOne({
   $or: [
     { tid: req.body.tid },
     { imei: req.body.imei },
-    { barcode: req.body.barcode }
+    { barcode: req.body.barcode },
+    { merchantIdentifier: req.body.merchantIdentifier }
   ]
 });
 
 if (exists) {
   return res.status(400).json({
     success: false,
-    message: "Soundbox already exists."
+    message: "Merchant Identifier / TID / IMEI / Barcode already exists."
   });
 }
 
@@ -94,19 +95,20 @@ exports.getSoundbox = async (req, res) => {
 exports.updateSoundbox = async (req, res) => {
   try {
 
-   const exists = await Soundbox.findOne({
+ const exists = await Soundbox.findOne({
   _id: { $ne: req.params.id },
   $or: [
     { tid: req.body.tid },
     { imei: req.body.imei },
-    { barcode: req.body.barcode }
+    { barcode: req.body.barcode },
+    { merchantIdentifier: req.body.merchantIdentifier }
   ]
 });
 
 if (exists) {
   return res.status(400).json({
     success: false,
-    message: "TID / IMEI / Barcode already exists."
+    message: "Merchant Identifier / TID / IMEI / Barcode already exists."
   });
 }
 

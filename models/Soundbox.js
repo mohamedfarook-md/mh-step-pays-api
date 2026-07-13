@@ -44,6 +44,32 @@ const soundboxSchema = new mongoose.Schema(
       required: true
     },
 
+    // Payment Provider Details
+provider: {
+  type: String,
+  required: true,
+  trim: true
+},
+
+merchantIdentifier: {
+  type: String,
+  required: true,
+  unique: true,
+  trim: true
+},
+
+providerMerchantId: {
+  type: String,
+  default: "",
+  trim: true
+},
+
+providerQrId: {
+  type: String,
+  default: "",
+  trim: true
+},
+
     // Soundbox Details
     tid: {
       type: String,
