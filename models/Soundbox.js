@@ -70,6 +70,18 @@ providerQrId: {
   trim: true
 },
 
+providerVirtualAccountId: {
+  type: String,
+  default: "",
+  trim: true
+},
+
+providerVpa: {
+  type: String,
+  default: "",
+  trim: true,
+  lowercase: true
+},
     // Soundbox Details
     tid: {
       type: String,

@@ -9,7 +9,8 @@ exports.createSoundbox = async (req, res) => {
     { tid: req.body.tid },
     { imei: req.body.imei },
     { barcode: req.body.barcode },
-    { merchantIdentifier: req.body.merchantIdentifier }
+    { merchantIdentifier: req.body.merchantIdentifier },
+    { providerVpa: req.body.providerVpa?.trim().toLowerCase() }
   ]
 });
 
@@ -21,9 +22,10 @@ if (exists) {
 }
 
     const soundbox = await Soundbox.create({
-      ...req.body,
-      createdBy: req.user._id
-    });
+  ...req.body,
+  providerVpa: req.body.providerVpa?.trim().toLowerCase(),
+  createdBy: req.user._id
+});
 
     res.status(201).json({
       success: true,
@@ -101,7 +103,8 @@ exports.updateSoundbox = async (req, res) => {
     { tid: req.body.tid },
     { imei: req.body.imei },
     { barcode: req.body.barcode },
-    { merchantIdentifier: req.body.merchantIdentifier }
+    { merchantIdentifier: req.body.merchantIdentifier },
+    { providerVpa: req.body.providerVpa?.trim().toLowerCase() }
   ]
 });
 
@@ -112,12 +115,15 @@ if (exists) {
   });
 }
 
+
+req.body.providerVpa =
+  req.body.providerVpa?.trim().toLowerCase();
+
 const soundbox = await Soundbox.findByIdAndUpdate(
   req.params.id,
   req.body,
   { new: true }
 );
-
     res.json({
       success: true,
       message: "Soundbox updated successfully",
