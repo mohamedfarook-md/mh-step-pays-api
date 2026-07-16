@@ -26,7 +26,7 @@ if (exists) {
   providerVpa: req.body.providerVpa?.trim().toLowerCase(),
   createdBy: req.user._id
 });
-
+console.log("SAVED =>", soundbox);
     res.status(201).json({
       success: true,
       message: "Soundbox added successfully",
