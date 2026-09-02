@@ -16,6 +16,10 @@ router.put('/agents/:id/status', ac.updateAgentStatus);
 
 // Merchants
 router.get('/merchants', ac.getMerchants);
+router.get(
+  '/merchants/:merchantId/onboarding',
+  ac.getMerchantOnboarding
+);
 router.put('/merchants/:id/approve', ac.approveMerchant);
 router.put('/merchants/:id/reject', ac.rejectMerchant);
 router.put('/merchants/:merchantId/transaction', ac.recordTransaction);

@@ -404,6 +404,7 @@ if (!payuResponse.success) {
 merchant.panNumber = panNumber.toUpperCase();
 merchant.authorizedSignatory.panNumber = panNumber.toUpperCase();
 merchant.dob = dob;
+merchant.panName = panName;
 merchant.onboardingStep = 2;
 merchant.currentSection = "ckyc";
 
@@ -1097,7 +1098,12 @@ exports.updateWebsiteDetails = async (req, res) => {
     // ======================================
 
     if (!websiteUrl && !androidUrl && !iosUrl) {
-
+  merchant.website = {
+    websiteUrl: null,
+    androidUrl: null,
+    iosUrl: null,
+    skipped: true
+  };
       merchant.currentSection = "signatory";
       merchant.onboardingStep = 7;
 
@@ -1141,6 +1147,13 @@ exports.updateWebsiteDetails = async (req, res) => {
     // ======================================
     // SAVE LOCAL DATA
     // ======================================
+
+    merchant.website = {
+  websiteUrl: websiteUrl || null,
+  androidUrl: androidUrl || null,
+  iosUrl: iosUrl || null,
+  skipped: false
+};
 
     merchant.currentSection = "signatory";
     merchant.onboardingStep = 7;

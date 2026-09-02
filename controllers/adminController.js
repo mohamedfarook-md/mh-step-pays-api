@@ -5,7 +5,7 @@ const { QRCode, Commission, AuditLog, AttendanceLog, Invoice } = require('../mod
 const { createAuditLog } = require('../utils/auditLogger');
 const { sendNotification, NOTIFICATION_TYPES } = require('../utils/notifications');
 const { getSignedUrl, uploadQR } = require('../config/cloudinary');
-
+const payuService = require('../services/payuService');
 // ─── Dashboard Stats ───────────────────────────────────────────────────────
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -423,4 +423,52 @@ exports.getInvoices = async (req, res) => {
 
   }
 
+};
+
+
+
+
+// GET COMPLETE MERCHANT ONBOARDING DETAILS
+exports.getMerchantOnboarding = async (req, res) => {
+  try {
+    const merchant = await Merchant.findById(req.params.merchantId)
+      .populate("assignedAgent", "fullName email mobile");
+
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        message: "Merchant not found",
+      });
+    }
+
+    // Fetch latest PayU document status/details
+    let payuDocuments = null;
+
+    if (merchant.payuMerchantId) {
+      const requiredDocsResponse =
+        await payuService.getRequiredDocuments(
+          merchant.payuMerchantId
+        );
+
+      if (requiredDocsResponse.success) {
+        payuDocuments = requiredDocsResponse.data;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        merchant,
+        payuDocuments,
+      },
+    });
+  } catch (error) {
+    console.error("Get merchant onboarding error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch merchant onboarding details",
+      error: error.message,
+    });
+  }
 };

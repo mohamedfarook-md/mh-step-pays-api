@@ -208,6 +208,41 @@ dob: {
 
 
 // ===============================
+// PAN NAME
+// ===============================
+panName: {
+  type: String,
+  default: null,
+},
+
+// ===============================
+// BUSINESS INFORMATION
+// ===============================
+businessInformation: {
+  businessCategory: { type: String, default: null },
+  businessSubCategory: { type: String, default: null },
+  addressLine1: { type: String, default: null },
+  addressLine2: { type: String, default: null },
+  city: { type: String, default: null },
+  state: { type: String, default: null },
+  pincode: { type: String, default: null },
+  gstin: { type: String, default: null },
+  cin: { type: String, default: null },
+  llpin: { type: String, default: null },
+  expectedMonthlySales: { type: String, default: null },
+},
+
+// ===============================
+// WEBSITE / INTEGRATION
+// ===============================
+website: {
+  websiteUrl: { type: String, default: null },
+  androidUrl: { type: String, default: null },
+  iosUrl: { type: String, default: null },
+  skipped: { type: Boolean, default: false },
+},
+
+// ===============================
 // CKYC
 // ===============================
 ckyc: {
