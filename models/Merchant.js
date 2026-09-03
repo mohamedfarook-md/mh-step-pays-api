@@ -230,6 +230,10 @@ businessInformation: {
   cin: { type: String, default: null },
   llpin: { type: String, default: null },
   expectedMonthlySales: { type: String, default: null },
+  registrationAddress: { type: String, default: null },
+registrationCity: { type: String, default: null },
+registrationState: { type: String, default: null },
+registrationPincode: { type: String, default: null },
 },
 
 // ===============================
