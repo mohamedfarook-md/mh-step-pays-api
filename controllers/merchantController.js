@@ -927,20 +927,24 @@ exports.updateBusinessInformation = async (req, res) => {
 
     const { merchantId } = req.params;
 
-    const {
-    
-      businessCategory,
-      businessSubCategory,
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      pincode,
-      gstin,
-      cin,
-      llpin,
-      expectedMonthlySales
-    } = req.body;
+   const {
+  businessCategory,
+  businessSubCategory,
+  addressLine1,
+  addressLine2,
+  city,
+  state,
+  pincode,
+  gstin,
+  cin,
+  llpin,
+  expectedMonthlySales,
+
+  registrationAddress,
+  registrationCity,
+  registrationState,
+  registrationPincode
+} = req.body;
 
     const merchant = await Merchant.findOne({
       _id: merchantId,
@@ -954,22 +958,25 @@ exports.updateBusinessInformation = async (req, res) => {
       });
     }
 
-   
+   merchant.businessInformation = {
+      ...merchant.businessInformation,
+  businessCategory,
+  businessSubCategory,
+  addressLine1,
+  addressLine2,
+  city,
+  state,
+  pincode,
+  gstin,
+  cin,
+  llpin,
+  expectedMonthlySales,
 
-    merchant.businessInformation = {
-      
-      businessCategory,
-      businessSubCategory,
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      pincode,
-      gstin,
-      cin,
-      llpin,
-      expectedMonthlySales
-    };
+  registrationAddress,
+  registrationCity,
+  registrationState,
+  registrationPincode
+};
 
    merchant.currentSection = "signatory";
 merchant.onboardingStep = 7;
@@ -984,17 +991,16 @@ console.log({
     cin
 });
 
-    const payuResponse = await payuService.updateBusiness(
-    merchant.payuMerchantUUID,
-    {
-        
-        business_category: businessCategory,
-        business_sub_category: businessSubCategory,
-        gstin: gstin,
-        cin: cin,
-        llpin: llpin,
-        expected_monthly_sales: expectedMonthlySales
-    }
+   const payuResponse = await payuService.updateBusiness(
+  merchant.payuMerchantUUID,
+  {
+    business_category: businessCategory,
+    business_sub_category: businessSubCategory,
+    gstin: gstin,
+    cin: cin,
+    llpin: llpin,
+    expected_monthly_sales: expectedMonthlySales,
+  }
 );
 
 if (!payuResponse.success) {
@@ -1007,9 +1013,33 @@ if (!payuResponse.success) {
 
 }
 
+// ======================================
+// UPDATE REGISTRATION ADDRESS IN PAYU
+// ======================================
+
+const addressResponse = await payuService.updateAddress(
+  merchant.payuMerchantUUID,
+  {
+    registrationAddress,
+    registrationCity,
+    registrationState,
+    registrationPincode
+  }
+);
+
+if (!addressResponse.success) {
+  return res.status(500).json({
+    success: false,
+    message: "Business saved, but unable to update Registration Address in PayU.",
+    error: addressResponse.data
+  });
+}
+
 merchant.payuSyncAt = new Date();
 
-    await merchant.save();
+await merchant.save();
+
+
 
     return res.status(200).json({
     success: true,

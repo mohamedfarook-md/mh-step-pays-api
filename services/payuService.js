@@ -1581,41 +1581,43 @@ async function getMerchantDetails(uuid) {
 // ======================================================
 // UPDATE ADDRESS
 // ======================================================
-
 async function updateAddress(uuid, address) {
 
     const form = new FormData();
 
-    Object.entries(address).forEach(([key, value]) => {
+    if (address.registrationAddress) {
+        form.append(
+            "merchant[registration_address][address_line]",
+            address.registrationAddress
+        );
+    }
 
-        if (
-            value !== undefined &&
-            value !== null &&
-            value !== ""
-        ) {
+    if (address.registrationCity) {
+        form.append(
+            "merchant[registration_address][city]",
+            address.registrationCity
+        );
+    }
 
-            form.append(
+    if (address.registrationState) {
+        form.append(
+            "merchant[registration_address][state]",
+            address.registrationState
+        );
+    }
 
-                `merchant[address][${key}]`,
-
-                value
-
-            );
-
-        }
-
-    });
+    if (address.registrationPincode) {
+        form.append(
+            "merchant[registration_address][pincode]",
+            address.registrationPincode
+        );
+    }
 
     return await apiPut(
-
-        `/api/v1/merchants/${uuid}/address`,
-
+        `/api/v1/merchants/${uuid}/update`,
         form
-
     );
-
 }
-
 // ======================================================
 // UPDATE WEBSITE DETAILS
 // ======================================================
