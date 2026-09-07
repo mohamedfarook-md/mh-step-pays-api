@@ -70,7 +70,18 @@ agreementAccepted: {
   default: false
 },
   // Assigned Agent
-  assignedAgent: { type: mongoose.Schema.Types.ObjectId, ref: 'FieldAgent', required: true },
+ assignedAgent: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'FieldAgent',
+  required: false,
+  default: null
+},
+
+customerId: {
+  type: mongoose.Schema.Types.ObjectId,
+  required: false,
+  default: null
+},
 
   // Status Workflow
   status: {

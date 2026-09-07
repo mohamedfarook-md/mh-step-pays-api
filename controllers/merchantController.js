@@ -126,36 +126,70 @@ exports.createMerchant = async (req, res) => {
       });
     }
 
-    const merchant = await Merchant.create({
-      merchantName,
-      mobile,
-      email,
-      shopName,
-      address,
-      entityType,
-      merchantType,
+//     const merchant = await Merchant.create({
+//       merchantName,
+//       mobile,
+//       email,
+//       shopName,
+//       address,
+//       entityType,
+//       merchantType,
 
-      assignedAgent: req.user._id,
+//       assignedAgent: req.user._id,
 
-      status: "draft",
+//       status: "draft",
 
       
-      onboardingStep: 1,
+//       onboardingStep: 1,
 
-      basicDetailsCompleted: false,
+//       basicDetailsCompleted: false,
 
-currentSection: "basic_details",
+// currentSection: "basic_details",
 
-      statusTimeline: [
-        {
-          status: "draft",
-          updatedBy: req.user._id,
-          updatedByRole: "agent",
-          note: "Basic Details Saved",
-        },
-      ],
-    });
+//       statusTimeline: [
+//         {
+//           status: "draft",
+//           updatedBy: req.user._id,
+//           updatedByRole: "agent",
+//           note: "Basic Details Saved",
+//         },
+//       ],
+//     });
 
+const isCustomer = req.user.role === "customer";
+
+const merchant = await Merchant.create({
+  merchantName,
+  mobile,
+  email,
+  shopName,
+  address,
+  entityType,
+  merchantType,
+
+  // Customer-created merchant
+  customerId: isCustomer ? req.user._id : null,
+
+  // Existing Agent-created merchant
+  assignedAgent: isCustomer ? null : req.user._id,
+
+  status: "draft",
+
+  onboardingStep: 1,
+
+  basicDetailsCompleted: false,
+
+  currentSection: "basic_details",
+
+  statusTimeline: [
+    {
+      status: "draft",
+      updatedBy: req.user._id,
+      updatedByRole: isCustomer ? "customer" : "agent",
+      note: "Basic Details Saved",
+    },
+  ],
+});
     // ======================================
 // PAYU MERCHANT CREATE (COMING NEXT)
 // ======================================
@@ -225,18 +259,34 @@ merchant.payuProductUUID =
 
 
 
+    // await createAuditLog({
+    //   userId: req.user._id,
+    //   userRole: "agent",
+    //   action: "MERCHANT_CREATED",
+    //   entityType: "Merchant",
+    //   entityId: merchant._id,
+    //   newValue: {
+    //     merchantName,
+    //     mobile,
+    //   },
+    //   req,
+    // });
+
+
+
     await createAuditLog({
-      userId: req.user._id,
-      userRole: "agent",
-      action: "MERCHANT_CREATED",
-      entityType: "Merchant",
-      entityId: merchant._id,
-      newValue: {
-        merchantName,
-        mobile,
-      },
-      req,
-    });
+  userId: req.user._id,
+  userRole: req.user.role,
+  action: "MERCHANT_CREATED",
+  entityType: "Merchant",
+  entityId: merchant._id,
+  newValue: {
+    merchantName,
+    mobile,
+  },
+  req,
+});
+
 
     return res.status(201).json({
     success: true,
@@ -346,10 +396,15 @@ exports.verifyPAN = async (req, res) => {
     }
 
     // Merchant Check
-    const merchant = await Merchant.findOne({
-      _id: merchantId,
-      assignedAgent: req.user._id,
-    });
+    // const merchant = await Merchant.findOne({
+    //   _id: merchantId,
+    //   assignedAgent: req.user._id,
+    // });
+
+    // Merchant Check
+const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
 
     if (!merchant) {
       return res.status(404).json({
@@ -379,6 +434,8 @@ exports.verifyPAN = async (req, res) => {
         message: "PayU Merchant UUID not found"
     });
 }
+
+
 
 
     // ======================================
@@ -520,6 +577,23 @@ if (!consentResponse.success) {
 
 
 
+// ─── Merchant Ownership Helper ─────────────────────────────────────────────
+
+const getMerchantOwnershipQuery = (req, merchantId) => {
+  if (req.user.role === "customer") {
+    return {
+      _id: merchantId,
+      customerId: req.user._id,
+    };
+  }
+
+  return {
+    _id: merchantId,
+    assignedAgent: req.user._id,
+  };
+};
+
+
 
 
  // ======================================
@@ -533,10 +607,14 @@ exports.verifyCKYCOTP = async (req, res) => {
     const { merchantId } = req.params;
     const { otp } = req.body;
 
-    const merchant = await Merchant.findOne({
-      _id: merchantId,
-      assignedAgent: req.user._id,
-    });
+    // const merchant = await Merchant.findOne({
+    //   _id: merchantId,
+    //   assignedAgent: req.user._id,
+    // });
+
+const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
 
     if (!merchant) {
       return res.status(404).json({
@@ -586,7 +664,10 @@ exports.getCKYCStatus = async (req, res) => {
   try {
     const { merchantId } = req.params;
 
-    const merchant = await Merchant.findById(merchantId);
+    // const merchant = await Merchant.findById(merchantId);
+    const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
 
     if (!merchant) {
       return res.status(404).json({
@@ -622,10 +703,14 @@ exports.skipCKYC = async (req, res) => {
 
     const { merchantId } = req.params;
 
-    const merchant = await Merchant.findOne({
-      _id: merchantId,
-      assignedAgent: req.user._id,
-    });
+    // const merchant = await Merchant.findOne({
+    //   _id: merchantId,
+    //   assignedAgent: req.user._id,
+    // });
+
+    const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
 
     if (!merchant) {
       return res.status(404).json({
@@ -713,10 +798,16 @@ exports.updateBankDetails = async (req, res) => {
             branchName
         } = req.body;
 
-        const merchant = await Merchant.findOne({
-            _id: merchantId,
-            assignedAgent: req.user._id
-        });
+        // const merchant = await Merchant.findOne({
+        //     _id: merchantId,
+        //     assignedAgent: req.user._id
+        // });
+
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
+
 
         if (!merchant) {
             return res.status(404).json({
@@ -743,25 +834,7 @@ exports.updateBankDetails = async (req, res) => {
         }
 
 
-// ======================================
-// SKIP WEBSITE FOR OFFLINE NON-RE
-// ======================================
 
-// const integrationResponse =
-//     await payuService.updateIntegrationType(
-//         merchant.payuMerchantUUID
-//     );
-
-// console.log("========== INTEGRATION TYPE RESPONSE ==========");
-// console.log(JSON.stringify(integrationResponse, null, 2));
-
-// if (!integrationResponse.success) {
-//     return res.status(500).json({
-//         success: false,
-//         message: "Bank updated but unable to skip website step.",
-//         error: integrationResponse.data
-//     });
-// }
 
         merchant.bank.accountHolderName = accountHolderName;
         merchant.bank.accountNumber = accountNumber;
@@ -811,7 +884,11 @@ exports.verifyBank = async (req, res) => {
 
         const { merchantId } = req.params;
 
-        const merchant = await Merchant.findById(merchantId);
+        // const merchant = await Merchant.findById(merchantId);
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -846,7 +923,11 @@ exports.getBankStatus = async (req, res) => {
 
         const { merchantId } = req.params;
 
-        const merchant = await Merchant.findById(merchantId);
+        // const merchant = await Merchant.findById(merchantId);
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -879,7 +960,11 @@ exports.testIntegrationType = async (req, res) => {
 
         const { merchantId } = req.params;
 
-        const merchant = await Merchant.findById(merchantId);
+        // const merchant = await Merchant.findById(merchantId);
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -946,10 +1031,14 @@ exports.updateBusinessInformation = async (req, res) => {
   registrationPincode
 } = req.body;
 
-    const merchant = await Merchant.findOne({
-      _id: merchantId,
-      assignedAgent: req.user._id
-    });
+    // const merchant = await Merchant.findOne({
+    //   _id: merchantId,
+    //   assignedAgent: req.user._id
+    // });
+
+    const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
 
     if (!merchant) {
       return res.status(404).json({
@@ -1069,10 +1158,17 @@ exports.getBusinessInformation = async (req, res) => {
 
     const { merchantId } = req.params;
 
-    const merchant = await Merchant.findOne({
-      _id: merchantId,
-      assignedAgent: req.user._id
-    });
+    // const merchant = await Merchant.findOne({
+    //   _id: merchantId,
+    //   assignedAgent: req.user._id
+    // });
+
+
+
+    const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
+
 
     if (!merchant) {
       return res.status(404).json({
@@ -1111,10 +1207,15 @@ exports.updateWebsiteDetails = async (req, res) => {
       iosUrl
     } = req.body;
 
-    const merchant = await Merchant.findOne({
-      _id: merchantId,
-      assignedAgent: req.user._id
-    });
+    // const merchant = await Merchant.findOne({
+    //   _id: merchantId,
+    //   assignedAgent: req.user._id
+    // });
+
+
+    const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
 
     if (!merchant) {
       return res.status(404).json({
@@ -1236,10 +1337,14 @@ exports.addSignatoryDetails = async (req, res) => {
             });
         }
 
-        const merchant = await Merchant.findOne({
-            _id: merchantId,
-            assignedAgent: req.user._id
-        });
+        // const merchant = await Merchant.findOne({
+        //     _id: merchantId,
+        //     assignedAgent: req.user._id
+        // });
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -1348,10 +1453,14 @@ exports.addUBO = async (req, res) => {
             });
         }
 
-        const merchant = await Merchant.findOne({
-            _id: merchantId,
-            assignedAgent: req.user._id
-        });
+        // const merchant = await Merchant.findOne({
+        //     _id: merchantId,
+        //     assignedAgent: req.user._id
+        // });
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -1553,10 +1662,16 @@ exports.initiateDigiLocker = async (req, res) => {
 
         const { merchantId } = req.params;
 
-        const merchant = await Merchant.findOne({
-            _id: merchantId,
-            assignedAgent: req.user._id
-        });
+        // const merchant = await Merchant.findOne({
+        //     _id: merchantId,
+        //     assignedAgent: req.user._id
+        // });
+
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
+
 
         if (!merchant) {
 
@@ -1714,10 +1829,14 @@ exports.shopVerification = async (req, res) => {
 
     try {
 
-        const merchant = await Merchant.findOne({
-    _id: req.params.merchantId,
-    assignedAgent: req.user._id,
-});
+//         const merchant = await Merchant.findOne({
+//     _id: req.params.merchantId,
+//     assignedAgent: req.user._id,
+// });
+
+const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, req.params.merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -1964,7 +2083,11 @@ exports.createVKYCProfile = async (req, res) => {
 
     try {
 
-        const merchant = await Merchant.findById(req.params.id);
+        // const merchant = await Merchant.findById(req.params.id);
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, req.params.id)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -2063,7 +2186,11 @@ exports.getRequiredDocuments = async (req, res) => {
       
       console.log("Params:", req.params);
 
-const merchant = await Merchant.findById(req.params.merchantId);
+// const merchant = await Merchant.findById(req.params.merchantId);
+
+const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, req.params.merchantId)
+);
 
 console.log("Merchant:", merchant);
 
@@ -2131,9 +2258,15 @@ exports.uploadKYCDocument = async (req, res) => {
 
     try {
 
-        const merchant = await Merchant.findById(
-            req.params.merchantId
-        );
+        // const merchant = await Merchant.findById(
+        //     req.params.merchantId
+        // );
+
+
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, req.params.merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
@@ -2439,10 +2572,18 @@ const payuResponse =
 // ─── Submit Merchant ───────────────────────────────────────────────────────
 exports.submitMerchant = async (req, res) => {
   try {
-    const merchant = await Merchant.findOne({
-  _id: merchantId,
-  assignedAgent: req.user._id,
-});
+//     const merchant = await Merchant.findOne({
+//   _id: merchantId,
+//   assignedAgent: req.user._id,
+// });
+
+
+const { merchantId } = req.params;
+
+const merchant = await Merchant.findOne(
+  getMerchantOwnershipQuery(req, merchantId)
+);
+
     if (!merchant) return res.status(404).json({ success: false, message: 'Merchant not found' });
     if (merchant.status !== 'draft') return res.status(400).json({ success: false, message: 'Only draft merchants can be submitted' });
 
@@ -2736,10 +2877,15 @@ exports.generateAgreement = async (req, res) => {
 
         const { merchantId } = req.params;
 
-        const merchant = await Merchant.findOne({
-            _id: merchantId,
-            assignedAgent: req.user._id
-        });
+        // const merchant = await Merchant.findOne({
+        //     _id: merchantId,
+        //     assignedAgent: req.user._id
+        // });
+
+
+        const merchant = await Merchant.findOne(
+    getMerchantOwnershipQuery(req, merchantId)
+);
 
         if (!merchant) {
             return res.status(404).json({
