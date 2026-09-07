@@ -80,7 +80,9 @@ router.use(protect);
    STEP 1 - BASIC DETAILS
 ================================ */
 
-router.post("/basic-details", agentOnly, mc.createMerchant);
+// router.post("/basic-details", agentOnly, mc.createMerchant);
+
+router.post("/basic-details", mc.createMerchant);
 
 router.put(
   "/:merchantId/basic-details",
