@@ -106,7 +106,6 @@ router.get(
 
 router.post(
   "/:merchantId/pan-verification",
-  agentOnly,
   mc.verifyPAN
 );
 
@@ -117,7 +116,6 @@ router.post(
 
 router.post(
   "/:merchantId/documents",
-  agentOnly,
   docFields,
   dc.uploadDocuments
 );
@@ -128,7 +126,6 @@ router.post(
 
 router.post(
   "/:merchantId/submit",
-  agentOnly,
   mc.submitMerchant
 );
 
@@ -159,14 +156,12 @@ router.get(
 // Send CKYC OTP
 router.post(
     "/:merchantId/ckyc/send-otp",
-    agentOnly,
     mc.sendCKYCOTP
 );
 
 // Verify CKYC OTP
 router.post(
     "/:merchantId/ckyc/verify-otp",
-    agentOnly,
     mc.verifyCKYCOTP
 );
 
@@ -181,7 +176,6 @@ router.get(
 // Skip CKYC
 router.post(
   "/:merchantId/ckyc/skip",
-  agentOnly,
   mc.skipCKYC
 );
 
@@ -197,7 +191,6 @@ router.put(
 
 router.post(
     "/:merchantId/bank/verify",
-    agentOnly,
     mc.verifyBank
 );
 
