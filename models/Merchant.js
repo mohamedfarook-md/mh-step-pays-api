@@ -245,6 +245,10 @@ businessInformation: {
 registrationCity: { type: String, default: null },
 registrationState: { type: String, default: null },
 registrationPincode: { type: String, default: null },
+operatingAddress: { type: String, default: null },
+operatingCity: { type: String, default: null },
+operatingState: { type: String, default: null },
+operatingPincode: { type: String, default: null },
 },
 
 // ===============================

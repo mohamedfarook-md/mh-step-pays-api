@@ -1581,10 +1581,14 @@ async function getMerchantDetails(uuid) {
 // ======================================================
 // UPDATE ADDRESS
 // ======================================================
+// ======================================================
+// UPDATE ADDRESS
+// ======================================================
 async function updateAddress(uuid, address) {
 
     const form = new FormData();
 
+    // Registration Address
     if (address.registrationAddress) {
         form.append(
             "merchant[registration_address][address_line]",
@@ -1610,6 +1614,35 @@ async function updateAddress(uuid, address) {
         form.append(
             "merchant[registration_address][pincode]",
             address.registrationPincode
+        );
+    }
+
+    // Operating Address
+    if (address.operatingAddress) {
+        form.append(
+            "merchant[operating_address][address_line]",
+            address.operatingAddress
+        );
+    }
+
+    if (address.operatingCity) {
+        form.append(
+            "merchant[operating_address][city]",
+            address.operatingCity
+        );
+    }
+
+    if (address.operatingState) {
+        form.append(
+            "merchant[operating_address][state]",
+            address.operatingState
+        );
+    }
+
+    if (address.operatingPincode) {
+        form.append(
+            "merchant[operating_address][pincode]",
+            address.operatingPincode
         );
     }
 

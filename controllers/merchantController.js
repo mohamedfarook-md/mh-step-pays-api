@@ -1025,10 +1025,15 @@ exports.updateBusinessInformation = async (req, res) => {
   llpin,
   expectedMonthlySales,
 
-  registrationAddress,
-  registrationCity,
-  registrationState,
-  registrationPincode
+registrationAddress,
+registrationCity,
+registrationState,
+registrationPincode,
+
+operatingAddress,
+operatingCity,
+operatingState,
+operatingPincode
 } = req.body;
 
     // const merchant = await Merchant.findOne({
@@ -1064,7 +1069,12 @@ exports.updateBusinessInformation = async (req, res) => {
   registrationAddress,
   registrationCity,
   registrationState,
-  registrationPincode
+  registrationPincode,
+
+  operatingAddress,
+operatingCity,
+operatingState,
+operatingPincode
 };
 
    merchant.currentSection = "signatory";
@@ -1109,10 +1119,17 @@ if (!payuResponse.success) {
 const addressResponse = await payuService.updateAddress(
   merchant.payuMerchantUUID,
   {
+    // Registration Address
     registrationAddress,
     registrationCity,
     registrationState,
-    registrationPincode
+    registrationPincode,
+
+    // Operating Address
+    operatingAddress,
+    operatingCity,
+    operatingState,
+    operatingPincode,
   }
 );
 
