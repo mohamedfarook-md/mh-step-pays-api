@@ -259,6 +259,10 @@ website: {
   androidUrl: { type: String, default: null },
   iosUrl: { type: String, default: null },
   skipped: { type: Boolean, default: false },
+  integrationType: {
+  type: String,
+  default: null,
+},
 },
 
 // ===============================

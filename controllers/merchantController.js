@@ -1221,7 +1221,8 @@ exports.updateWebsiteDetails = async (req, res) => {
     const {
       websiteUrl,
       androidUrl,
-      iosUrl
+      iosUrl,
+        integrationType
     } = req.body;
 
     // const merchant = await Merchant.findOne({
@@ -1250,10 +1251,24 @@ exports.updateWebsiteDetails = async (req, res) => {
     websiteUrl: null,
     androidUrl: null,
     iosUrl: null,
-    skipped: true
+    skipped: true,
+    integrationType: integrationType || "Tools"
   };
       merchant.currentSection = "signatory";
       merchant.onboardingStep = 7;
+      
+      const integrationResponse =
+  await payuService.updateIntegrationType(
+    merchant.payuMerchantUUID
+  );
+
+if (!integrationResponse.success) {
+  return res.status(500).json({
+    success: false,
+    message: "Website skipped, but unable to update Integration Type in PayU.",
+    error: integrationResponse.data
+  });
+}
 
       await merchant.save();
 
