@@ -5,6 +5,14 @@ const ac = require('../controllers/adminController');
 const dc = require('../controllers/documentController');
 const { uploadQR, uploadInvoice } = require('../config/cloudinary');
 
+
+// App QR Leads - allow customer JWT
+router.get(
+  '/merchants/qr-leads',
+  protect,
+  ac.getAppQrLeads
+);
+
 router.use(protect, adminOnly);
 
 // Dashboard
@@ -15,7 +23,7 @@ router.get('/agents', ac.getAgents);
 router.put('/agents/:id/status', ac.updateAgentStatus);
 
 // Merchants
-router.get('/merchants/qr-leads', ac.getAppQrLeads);
+
 router.get('/merchants', ac.getMerchants);
 router.get(
   '/merchants/:merchantId/onboarding',
