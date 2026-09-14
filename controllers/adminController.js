@@ -175,6 +175,87 @@ exports.rejectMerchant = async (req, res) => {
   }
 };
 
+
+// ─── App QR Leads ─────────────────────────────────────────────
+exports.getAppQrLeads = async (req, res) => {
+  try {
+    const {
+      search,
+      status,
+      agentId,
+      from,
+      to,
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    const query = {
+      customerId: { $ne: null },
+    };
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (agentId) {
+      query.assignedAgent = agentId;
+    }
+
+    if (search) {
+      query.$or = [
+        { merchantName: new RegExp(search, "i") },
+        { shopName: new RegExp(search, "i") },
+        { mobile: new RegExp(search, "i") },
+      ];
+    }
+
+    if (from || to) {
+      query.createdAt = {};
+
+      if (from) {
+        query.createdAt.$gte = new Date(from);
+      }
+
+      if (to) {
+        const endDate = new Date(to);
+        endDate.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = endDate;
+      }
+    }
+
+    const pageNumber = Number(page);
+    const pageLimit = Number(limit);
+
+    const total = await Merchant.countDocuments(query);
+
+    const merchants = await Merchant.find(query)
+      .populate("assignedAgent", "fullName email mobile")
+      .populate("qrCode")
+      .sort({ createdAt: -1 })
+      .skip((pageNumber - 1) * pageLimit)
+      .limit(pageLimit);
+
+    res.json({
+      success: true,
+      data: {
+        items: merchants,
+        total,
+        page: pageNumber,
+        limit: pageLimit,
+        pages: Math.ceil(total / pageLimit),
+      },
+    });
+  } catch (err) {
+    console.error("Get App QR Leads Error:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch App QR leads",
+    });
+  }
+};
+
+
 // ─── QR Management ─────────────────────────────────────────────────────────
 exports.uploadQRCode = async (req, res) => {
   try {

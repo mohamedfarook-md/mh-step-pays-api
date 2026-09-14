@@ -15,6 +15,7 @@ router.get('/agents', ac.getAgents);
 router.put('/agents/:id/status', ac.updateAgentStatus);
 
 // Merchants
+router.get('/merchants/qr-leads', ac.getAppQrLeads);
 router.get('/merchants', ac.getMerchants);
 router.get(
   '/merchants/:merchantId/onboarding',
