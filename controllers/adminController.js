@@ -508,6 +508,53 @@ exports.getInvoices = async (req, res) => {
 
 
 
+// ─── App QR Lead Onboarding Details ───────────────────────────
+exports.getAppQrLeadOnboarding = async (req, res) => {
+  try {
+    const merchant = await Merchant.findOne({
+      _id: req.params.merchantId,
+      customerId: { $ne: null },
+    }).populate("assignedAgent", "fullName email mobile");
+
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        message: "App QR merchant not found",
+      });
+    }
+
+    let payuDocuments = null;
+
+    if (merchant.payuMerchantId) {
+      const requiredDocsResponse =
+        await payuService.getRequiredDocuments(
+          merchant.payuMerchantId
+        );
+
+      if (requiredDocsResponse.success) {
+        payuDocuments = requiredDocsResponse.data;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        merchant,
+        payuDocuments,
+      },
+    });
+  } catch (error) {
+    console.error("Get App QR lead onboarding error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch App QR lead onboarding details",
+      error: error.message,
+    });
+  }
+};
+
+
 
 // GET COMPLETE MERCHANT ONBOARDING DETAILS
 exports.getMerchantOnboarding = async (req, res) => {

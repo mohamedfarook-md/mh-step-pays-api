@@ -13,6 +13,12 @@ router.get(
   ac.getAppQrLeads
 );
 
+router.get(
+  '/merchants/:merchantId/qr-lead-onboarding',
+  protect,
+  ac.getAppQrLeadOnboarding
+);
+
 router.use(protect, adminOnly);
 
 // Dashboard
